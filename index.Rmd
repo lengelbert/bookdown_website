@@ -1,0 +1,38 @@
+--- 
+title: "A Comparison of Carnivore Monitoring Techniques"
+author: "Lindsey Engelbert"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [book.bib, packages.bib]
+# url: your book url like https://bookdown.org/yihui/bookdown
+# cover-image: path to the social sharing image like images/cover.jpg
+description: |
+  This book was created as a part of my final project for Simona Picardi's
+  Reproducible Data Science Class. It will outline the steps of my final project.
+link-citations: yes
+github-repo: rstudio/bookdown-demo
+---
+
+# Project Description
+
+This chapter of my dissertation will compare the precision, efficiency, and 
+cost-effectiveness of four wildlife monitoring techniques - GPS collars, 
+remote camera traps, hair snares, and scat detection dogs - at "capturing" and 
+estimating density for sympatric large mammalian carnivores in Utah, 
+specifically black bears, bobcats,and cougars. This will involve comparing the 
+number of raw detections (i.e., the proportion of cells where a species was 
+detected by a single survey method) and the number of unique detections (i.e., 
+the number of times a detection by a given method represented the only 
+detection of that species). I will compare these metrics across methods and 
+species. It will also involve calculating the per survey cost of each method. 
+Lastly, I will run various population models with the data to estimate the 
+abundance and/or density of each species and compare the precision of each 
+population estimation model and its source data.
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```

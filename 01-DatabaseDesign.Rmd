@@ -1,0 +1,396 @@
+# Designing and Building my Database
+
+```{r global_options, eval = TRUE, echo = FALSE}
+
+# my personal location for this course
+  knitr::opts_knit$set(root.dir = "C:/Users/engel/Documents/PhD/Research/MonitoringTechniques/MonitoringTechniques_data")
+
+# turn off annoying messages with this option
+  knitr::opts_chunk$set(warning = T, error = T, message = F)
+  
+```
+
+## Database structure
+
+```{r diagram, eval = TRUE, echo = FALSE, message = FALSE, out.width = '90%', fig.align = 'center', fig.cap = 'Diagram illustrating the stucture of the database'}
+
+knitr::include_graphics("DatabaseDesign.png")
+
+```
+
+## Creating the database
+
+This is the code I used to create the database. I started by loading the `DBI` 
+and `RSQLite` packages:
+
+```{r pkg, eval = TRUE, echo = TRUE, warning = FALSE, message = FALSE}
+
+library(DBI)
+library(RSQLite)
+
+```
+
+Then, I both created and established a connection to a SQLite database using a 
+single line of code.
+
+```{r db_connection, eval = TRUE, echo = TRUE}
+montech_db <- dbConnect(RSQLite::SQLite(),
+                        "montech.db")
+```
+
+### Creating the carnivores table
+
+This table includes all the information about individuals that are part of my 
+study. The table includes columns for carnivore ID, ear tag, sex, birth year, 
+age class, and species. The `carnivore_id` column contains a unique identifier 
+and, as such, it is the primary key of this table. 
+
+```{r carnivores_table, eval = FALSE, echo = TRUE}
+
+carnivores <- dbExecute(montech_db, "CREATE TABLE carnivores (
+                        carnivore_id varchar(9) NOT NULL,
+                        ear_tag integer(4),
+                        sex char(1) CHECK (sex IN ('M', 'F')),
+                        birth_year integer(4),
+                        age_class varchar(8) CHECK (age_class IN ('juvenile', 'subadult', 'adult')),
+                        species varchar(9) CHECK (species IN ('cougar', 'blackbear', 'bobcat')),
+                        PRIMARY KEY (carnivore_id)
+                        );")
+
+```
+
+### Creating the collars table
+
+This table includes all the details for each GPS collars deployed on black
+bears, bobcats, and mountain lions in my study area. The table includes columns
+for collar id, collar frequency, collar brand, collar model, and collar status.
+The `collar_id` column contains a unique identifier and is therefore the primary
+key for this table. 
+
+```{r collars_table, eval = FALSE, echo = TRUE}
+
+collars <- dbExecute(montech_db, "CREATE TABLE collars (
+                    collar_id integer(6) NOT NULL,
+                    frequency real (6),
+                    brand char(3) CHECK (brand IN ('ATS')),
+                    model varchar (10),
+                    status char(11) CHECK (status IN ('deployed', 'office')),
+                    PRIMARY KEY (collar_id)
+                    );")
+
+```
+
+### Creating the deployments table
+
+This table includes all the information related to GPS collar deployments in my 
+study area. The table includes columns for collar id, carnivore id, date
+deployed, and the date the collar stopped working or was retrieved. As there was
+no unique identifier for this table, I created an auto incremented `deployment_id` 
+that could act as the primary key for this table. The table is related to the 
+collars table through `collar_id` column and the carnivore table through the 
+`carnivore_id` column.
+
+```{r deployments_table, eval = FALSE, echo = TRUE}
+
+deployments <- dbExecute(montech_db, "CREATE TABLE deployments (
+                        deployment_id integer PRIMARY KEY AUTOINCREMENT,
+                        collar_id integer(5),
+                        carnivore_id varchar(9),
+                        start_deployment text,
+                        end_deployment text,
+                        FOREIGN KEY(collar_id) REFERENCES collars(collar_id)
+                        FOREIGN KEY(carnivore_id) REFERENCES carnivores(carnivore_id)
+                        );")
+```
+
+### Creating the raw GPS data table
+
+This table includes all the raw GPS data for collared animals in my study. The 
+table includes columns for fix id, collar id, fix timestamp, and coordinates.
+As there was no unique identifier for this table, I created an auto incremented 
+`fix_id` that could act as the primary key for this table. The table is related 
+to the collars table through `collar_id` column.
+
+```{r gps_data_table, eval = FALSE, echo = TRUE}
+
+gps_data <- dbExecute(montech_db, "CREATE TABLE gps_data (
+                    fix_id integer PRIMARY KEY AUTOINCREMENT,
+                    collar_id integer(5),
+                    timestamp text,
+                    utm_x double,
+                    utm_y double,
+                    FOREIGN KEY(collar_id) REFERENCES collars(collar_id)
+                    );")
+
+```
+
+### Creating the capture sites table
+
+This table includes all capture locations of animals collared for my study. The 
+table includes columns for the capture unit, subunit, and area.
+As there was no unique identifier for this table, I created an auto incremented 
+`capture_location` that could act as the primary key for this table.
+
+```{r capture_sites_tabe, eval = FALSE, echo = TRUE}
+
+capture_sites <- dbExecute(montech_db, "CREATE TABLE capture_sites (
+                          capture_location integer PRIMARY KEY AUTOINCREMENT,
+                          capture_area varchar PRIMARY KEY,
+                          capture_subunit char CHECK (capture_subunit IN ('Nebo', 'Manti')),
+                          capture_unit char(16) CHECK (capture_unit IN ('CentralMountians'))
+                          );")
+
+```
+
+### Creating the captures table
+
+This table includes relevant information on carnivore captures for my study. The
+table includes columns for the capture id, carnivore id, capture date, capture 
+time, capture area, coordinates for the capture location, capture method, and 
+the tissue sample id. The `capture_id` column contains a unique identifier and 
+is therefore the primary key for this table. The table is related to the carnivores
+table through `carnivore_id` column and the capture sites table through the 
+`capture_area` column. 
+
+```{r captures_table, eval = FALSE, echo = TRUE}
+
+captures <- dbExecute(montech_db, "CREATE TABLE captures (
+                      capture_id varchar PRIMARY KEY,
+                      carnivore_id varchar(9),
+                      date text,
+                      time text,
+                      capture_area varchar,
+                      utm_x float,
+                      utm_y float,
+                      capture_method varchar CHECK (capture_method IN ('hounds', 'boxtrap', 'leghold')),
+                      tissue_sample_id varchar,
+                      FOREIGN KEY (carnivore_id) REFERENCES carnivores(carnivore_id)
+                      FOREIGN KEY (capture_area) REFERENCES capture_sites(capture_area)
+                      );")
+
+```
+
+### Creating the sampling cells table
+
+This table includes information on the sampling design of my study. Each 
+sampling cell will contain at least one hair snare, a paired camera station, and
+scat transects. The table includes columns for the cell id, grid id, start and
+end dates for the cell's sampling period, and coordinates for the cell center.
+The `cell_id` column contains a unique identifier and is therefore the primary 
+key for this table.
+
+```{r sampling_cells_table, eval = FALSE, echo = TRUE}
+
+sampling_cells <- dbExecute(montech_db, "CREATE TABLE sampling_cells (
+                           cell_id varchar NOT NULL,
+                           grid_id integer(2),
+                           start_date text,
+                           end_date text,
+                           utm_x float,
+                           utm_y float,
+                           PRIMARY KEY (cell_id)
+                            );")
+
+```
+
+### Creating the sampling periods table
+
+This table provides the dates for each sampling period. The `sampling_periods`
+column contains a unique identifier and is therefore the primary key for this 
+table.
+
+```{r sampling_periods_table, eval = FALSE, echo = TRUE}
+
+sampling_periods <- dbExecute(montech_db, "CREATE TABLE sampling_periods (
+                              sampling_period integer(2) PRIMARY KEY,
+                              start_date text,
+                              end_date text
+                              );"
+
+```
+
+### Creating the cameras table
+
+This table includes information on cameras deployed for my study. The table 
+includes columns for the camera id, cell id, camera coordinates, and camera 
+location. The `camera_id` column contains a unique identifier and is therefore 
+the primary key for this table. The table is related to the sampling cells
+table through `cell_id` column.
+
+```{r cameras_table, eval = FALSE, echo = TRUE}
+
+cameras <- dbExecute(montech_db, "CREATE TABLE cameras (
+                    camera_id varchar NOT NULL,
+                    cell_id varchar,
+                    utm_x float,
+                    utm_y float,
+                    location varchar CHECK (location IN ('dirt_road', 'hiking_trail', 'game_trail', 'wash', 'off_trail', 'other')),
+                    PRIMARY KEY (camera_id),
+                    FOREIGN KEY (cell_id) REFERENCES sampling_cells(cell_id)
+                    );")
+
+```
+
+### Creating the photos table
+
+This table includes information on carnivore photos taken by camera traps. The
+table includes columns for the photo id, camera id, sampling period, timestamp, 
+species, carnivore id if applicable, and individual id. The `photo_id` column 
+contains a unique identifier and is therefore the primary key for this table. 
+The table is related to the carnivores table through `carnivore_id` column and 
+the capture sites table through the `capture_area` column.
+
+```{r photos_table, eval = FALSE, echo = TRUE}
+
+photos <- dbExecute(montech_db, "CREATE TABLE photos (
+                    photo_id varchar PRIMARY KEY,
+                    camera_id varchar,
+                    sampling_period integer(2),
+                    timestamp text,
+                    species varchar(9) CHECK (species IN ('cougar', 'blackbear', 'bobcat', 'coyote')), 
+                    carnivore_id varchar(9),
+                    individual_id varchar,
+                    FOREIGN KEY (camera_id) REFERENCES cameras(camera_id)
+                    FOREIGN KEY (carnivore_id) REFERENCES carnivores(carnivore_id)
+                    FOREIGN KEY (sampling_period) REFERENCES sampling_periods(sampling_period)
+                    );")
+
+```
+
+### Creating the transects table
+
+This table includes information on the transects walked by scat detector dogs
+and handlers. The table includes columns for the transect id, start and end 
+coordinates, and the id of the track recorded by handlers. The `transect_id` 
+column contains a unique identifier and is therefore the primary key for this 
+table. 
+
+```{r transects_table, eval = FALSE, echo = TRUE}
+
+transects <- dbExecute(montech_db, "CREATE TABLE transects (
+                      transect_id varchar NOT NULL, 
+                      start_utm_x float,
+                      start_utm_y float,
+                      end_utm_x float,
+                      end_utm_y float,
+                      track_id varchar,
+                      PRIMARY KEY (transect_id)
+                      );")
+
+```
+
+### Creating the scat samples table
+
+This table includes information related to scat samples. The table includes 
+columns for sample_id, date and time collected, sampling period, transect id, 
+who collected the scat, cell age, scat coordinates, scat age, suspected species, 
+and sample preservation method. The `sample_id` column contains a unique 
+identifier and is therefore the primary key for this table. The table is related 
+to the sampling periods table through the `sampling_periods` column and the 
+transects table through the `transect_id` column.
+
+```{r scat_samples_table, eval = FALSE, echo = TRUE}
+
+scat_samples <- dbExecute(montech_db, "CREATE TABLE scat_samples (
+                          sample_id varchar NOT NULL,
+                          date text,
+                          time text,
+                          sampling_period integer(2),
+                          transect_id varchar,
+                          collected_by varchar,
+                          cell_id varchar,
+                          utm_x float, 
+                          utm_y float,
+                          sample_age varchar CHECK (sample_age IN ('fresh', 'medium', 'old')),
+                          suspected_species varchar, 
+                          preservation_method char CHECK (preservation_method IN ('dehydration', 'ethanol', 'shield')),
+                          PRIMARY KEY (sample_id),
+                          FOREIGN KEY (sampling_period) REFERENCES sampling_periods(sampling_period)
+                          FOREIGN KEY (transect_id) REFERENCES transects(transect_id)
+                          );")
+
+```
+
+### Creating the hair snares table
+
+This table includes information on hair snares deployed for my study. The table 
+includes columns device id, device type, cell id, start and end deployment dates,
+and snare coordinates. The `device_id` column contains a unique identifier and 
+is therefore the primary key for this table. The table is related to the 
+sampling cells table through the `sampling_cells` column.
+
+```{r hair_snares_table, eval = FALSE, echo = TRUE}
+
+hair_snares <- dbExecute(montech_db, "CREATE TABLE hair_snares (
+                        device_id varchar NOT NULL,
+                        device_type varchar CHECK (device_type IN ('cubby', 'corral', 'pad')),
+                        cell_id varchar,
+                        start_deployment text,
+                        end_deployment text,
+                        utm_x float,
+                        utm_y float,
+                        PRIMARY KEY (device_id),
+                        FOREIGN KEY (cell_id) REFERENCES sampling_cells(cell_id)
+                        );")
+```
+
+### Creating the hair samples table
+
+This table includes information related to hair samples collected for my study. 
+The table includes columns for sample_id, date and time collected, sampling period, 
+cell id, device_id, who collected the hair, and the scent used. The `sample_id` 
+column contains a unique identifier and is therefore the primary key for this 
+table. The table is related to the sampling cells table through the `cell_id`
+column, the sampling periods table through the `sampling_periods` column, and 
+the hair snares table through the `device_id` column.
+
+```{r hair_samples_table, eval = FALSE, echo = TRUE}
+hair_samples <- dbExecute(montech_db, "CREATE TABLE hair_samples (
+                          sample_id varchar NOT NULL,
+                          date text,
+                          time text,
+                          cell_id varchar,
+                          sampling_period integer(2),
+                          device_id varchar,
+                          collected_by char,
+                          scent_used char,
+                          PRIMARY KEY (sample_id)
+                          FOREIGN KEY (cell_id) REFERENCES sampling_cells(cell_id)
+                          FOREIGN KEY (sampling_period) REFERENCES sampling_periods(sampling_period)
+                          FOREIGN KEY (device_id) REFERENCES hair_snares(device_id)
+                          );")
+
+```
+
+### Creating the genetics table
+
+This table includes genetic information for processed hair, scat, and tissue 
+samples collected for my study. The table includes columns for genetic id, 
+genetic method, sample type, sample id, tissue sample id,  carnivore id, 
+carnivore species, and sex. As there was no unique identifier for this table, I 
+created an auto incremented `genetic_number` that could act as the primary key 
+for this table. The table is related to both the hair sample and scat sample 
+tables through the `sample_id`column, the capture table through the 
+`tissue_sample_id` column, and the carnivores table through the `carnivore_id` 
+column.
+
+```{r genetics_table, eval = FALSE, echo = TRUE}
+
+genetics <- dbExecute(montech_db, "CREATE TABLE genetics (
+                      genetic_number integer PRIMARY KEY AUTOINCREMENT,
+                      genetic_id varchar, 
+                      genetic_method varchar,
+                      sample_type char CHECK (sample_type IN ('hair', 'scat', 'tissue', 'blood')),
+                      sample_id varchar,
+                      tissue_sample_id varchar,
+                      carnivore_id varchar,
+                      species varchar(9) CHECK (species IN ('cougar', 'blackbear', 'bobcat', 'coyote')),
+                      sex char(1) CHECK (sex IN ('F', 'M')),
+                      FOREIGN KEY (sample_id) REFERENCES hair_samples(sample_id)
+                      FOREIGN KEY (sample_id) REFERENCES scat_samples(sample_id)
+                      FOREIGN KEY (tissue_sample_id) REFERENCES captures(tissue_sample_id)
+                      FOREIGN KEY (carnivore_id) REFERENCES carnivores(carnivore_id)
+                      );")
+
+```
+
