@@ -11,7 +11,7 @@ description: |
   This book was created as a part of my final project for Simona Picardi's
   Reproducible Data Science Class. It will outline the steps of my final project.
 link-citations: yes
-github-repo: rstudio/bookdown-demo
+github-repo: https://github.com/lengelbert/bookdown_website.git
 ---
 
 # Project Description
