@@ -42,7 +42,7 @@ montech_db <- dbConnect(RSQLite::SQLite(),
 
 This table includes all the information about individuals that are part of my 
 study. The table includes columns for carnivore ID, ear tag, sex, birth year, 
-age class, and species. The `carnivore_id` column contains a unique identifier 
+age class, and species. The `carnivore_id` column contains a unique identifier
 and, as such, it is the primary key of this table. 
 
 ```{r carnivores_table, eval = FALSE, echo = TRUE}

@@ -1,0 +1,250 @@
+# Cleaning the Raw Data
+
+Now that the database is built, the raw cougar and black bear data that I'm getting from Utah's Wildlife Tracker needs to be transformed into a format that can be imported into my monitoring techniques database. The data from Wildlife Tracker will go into my carnivore, capture_sites, collar, deployments, and gps_data tables. 
+
+## Preliminary steps
+
+### Load Libraries
+
+Load all the libraries I'll need to run the code
+
+```{r pkgs, eval = TRUE, echo = TRUE, warning = FALSE, message = FALSE}
+
+library(DBI)
+library(RSQLite)
+library(tidyverse)
+library(lubridate)
+library(sf)
+
+```
+
+### Database connection
+
+Then make sure that there's still a connection with the monitoring techniques
+database.
+
+```{r db_connection2, eval = FALSE, echo = TRUE}
+
+montech_db <- dbConnect(RSQLite::SQLite(),
+                        "montech.db")
+
+```
+
+### Import the raw data
+
+Import the raw data from wildlife tracker
+
+```{r data, eval = FALSE, echo = TRUE}
+
+raw_data <- read.csv("raw_data/2023-04-11_GPS_Data.csv", header = TRUE)
+
+```
+
+Once these preliminary steps are completed, we can actually clean the data.
+
+## Formating Data for the Tables
+
+### Carnivore table formating
+
+I'll start with the data needed for the carnivores table. I'll need to pull the 
+columns uniqueID, earTag, sex, birthYear, currentCohort, and species from the raw 
+data using the `select()` function. Since these columns have different names than 
+the names of my fields in my database table I then need to rename each column 
+using the `rename()` function. Then, because there are many entries for each 
+carnivore_id, I need to pull only the unique carnivore ids. In this case I used `filter(!duplicated(carnivore_id))` instead of distinct because Wildlife Tracker 
+calculates the age class based on the birth year so there were duplicate rows for 
+individuals that were unique because the collar had been on them for multiple age 
+classes. Finally, I need to make sure that my entries matched the table constraints. 
+This meant deleting all the spaces in the entries using the `gsub()` function.
+
+```{r carnivore_data, eval = FALSE, echo = TRUE}
+
+carnivores <- raw_data %>%
+  select(uniqueID, earTag, sex, birthYear, currentCohort, species) %>%
+  rename(carnivore_id = uniqueID, 
+         ear_tag = earTag, 
+         birth_year = birthYear,
+         age_class = currentCohort) %>%
+  arrange(age_class) %>%
+  filter(!duplicated(carnivore_id)) %>%
+  mutate(species = gsub(" ", "", species))
+
+```
+
+### Collar table formating
+
+I'll next create the collars table. Again, I'll need to pull only the necessary
+columns using the `select()` function. In this case, it's only collarID and freq.
+Since Wildlife Tracker doesn't contain information on brand, model, or status I
+had to create placeholder columns populated with NAs until I can acquire that data
+from a different source. This time the columns are in a different order than
+what I need for my database, so I used the `relocate()`function to reorder them.
+I then renamed the necessary columns and finally pulled out the unique entries 
+using the `distinct()` function.
+
+```{r collar_data, eval = FALSE, echo = TRUE}
+
+collars <- raw_data %>%
+  select(collarID, freq) %>%
+  mutate(brand = NA, model = NA, status = NA) %>%
+  relocate(freq, .after = status) %>%
+  rename(collar_id = collarID, 
+         frequency = freq) %>%
+  distinct()
+
+```
+
+### Deployments table formating
+
+For the deployments table, I needed to pull carnivoreID and collarID from the 
+raw Wildlife Tracker data. Since I don't yet have data on the deployment start
+and end dates, I just created empty columns for those fields and populated them
+with NA until I acquire the necessary data. Finally, I reordered the columns
+according to my database format using `relocate()`and grabbed only the unique 
+combinations of columns using `disctinct()`.
+
+```{r deployments1_table, eval = FALSE, echo = TRUE}
+
+deployments <- raw_data %>%
+  select(uniqueID, collarID) %>%
+  rename(carnivore_id = uniqueID, collar_id = collarID) %>%
+  relocate(collar_id, .before = carnivore_id) %>%
+  mutate(start_deployment = NA, end_deployment = NA) %>%
+  distinct()
+
+```
+
+### Capture sites table formating 
+
+For the capture sites table, I needed to pull the captureUnit, captureSubUnit,
+and realCaptureArea columns from the Wildlife Tracker data using `select()`. I
+then renamed them and switched the order of the columns so that it matched my
+database table. As there were multiple columns with spaces in the entries, I had
+to eliminate those using `gsub` so that it matched the database table constraints.
+Lastly, I took only the unique combinations of entries by using `distinct()`.
+
+```{r capture_sites_data, eval = FALSE, echo = TRUE}
+
+capture_sites <- raw_data %>%
+  select(captureUnit, captureSubUnit, realCaptureArea) %>%
+  rename(capture_unit = captureUnit, 
+         capture_subunit = captureSubUnit,
+         capture_area = realCaptureArea) %>%
+  relocate(capture_area, .before = capture_unit) %>% 
+  relocate(capture_subunit, .after = capture_area) %>%
+  mutate(capture_area = gsub(" ", "", capture_area)) %>%
+  mutate(capture_unit = gsub(" ", "", capture_unit)) %>%
+  distinct()
+
+```
+
+
+### GPS data table formating
+
+Yet again, I pulled the columns that I wanted from the raw Wildlife Tracker data
+and renamed and ordered them appropriately. This included collarID, 
+datYearAndJUlian, litutde, and longitude. I then had to tell R that the 
+timestamp column is a time and date, as well as the format and timezone of that 
+time and date.  
+
+```{r gps_data_data, eval = FALSE, echo = TRUE}
+
+gps_data <- raw_data %>%
+  select(collarID, dateYearAndJulian, latitude, longitude) %>%
+  rename(collar_id = collarID, 
+         timestamp = dateYearAndJulian) %>%
+  relocate(longitude, .before = latitude) %>%
+  mutate(timestamp = mdy_hm(timestamp, tz = "America/Denver")) 
+
+```
+
+There were then a number of steps I had to take to convert the fix points from 
+lat long to utm. First, I had to turn the lat long columns into a spatial object
+so that R could recognize them as such. Then I could transform that spatial object
+to utm coordinates and pull just those columns from the data. I then joined those
+utm easting and northing columns back with the object I created from the 
+Wildlife Tracker data, deleted the lat long columns, and renamed the utm columns
+so that they matched my database table. 
+
+``` {r spatial_object, eval = FALSE, echo = TRUE}
+
+utm_coords <- gps_data %>% 
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
+  st_transform(crs = 32612) %>%
+  st_coordinates()
+
+
+gps_data <- cbind(gps_data, utm_coords) %>%
+  select(collar_id, timestamp, X, Y) %>%
+  rename(utm_x = X, utm_y = Y)
+
+```
+
+## Adding Data to the Database
+
+Now that the data is cleaned and organized according to the format of the 
+monitoring techniques database tables, we can actually add the data to the tables.
+This is a simple process that can be done with a single line of code for each table.
+
+Since this is our first time adding we can merely tell it to append the data to 
+the table. However, in the future when we have to be careful about whether we're 
+telling it to append  or overwrite the data. In cases where we're downloading all 
+the data that exists for a table we can tell it to overwrite, but in cases where 
+we're merely adding data that's new since the last time we downloaded we need to 
+make sure we're telling it to append that data to what already exists in the table.
+
+### Carnivore table
+
+Here I added the data I pulled and formatted from the Wildlife Tracker raw data to 
+the carnivores table in the montech.db.
+
+```{r carnivore_table1, eval = FALSE, echo = TRUE}
+
+dbWriteTable(montech_db, "carnivores", carnivores, append = TRUE)
+
+```
+
+### Collars table
+
+Here I added the data I pulled and formatted from the Wildlife Tracker raw data to 
+the collars table in the montech.db.
+
+```{r collar_table1, eval = FALSE, echo = TRUE}
+
+dbWriteTable(montech_db, "collars", collars, append = TRUE)
+
+```
+
+### Deployments table
+
+Here I added the data I pulled and formatted from the Wildlife Tracker raw data
+to the deployments table in the montech.db.
+
+```{r capture_sites_table, eval = FALSE, echo = TRUE}
+
+dbWriteTable(montech_db, "deployments", deployments, append = TRUE)
+
+```
+
+### Capture sites table
+
+Here I added the data I pulled and formatted from the Wildlife Tracker raw data to 
+the capture sites table in the montech.db.
+
+```{r capture_sites_table1, eval = FALSE, echo = TRUE}
+
+dbWriteTable(montech_db, "capture_sites", capture_sites, append = TRUE)
+
+```
+
+### GPS data table
+
+Here I added the data I pulled and formatted from the Wildlife Tracker raw data to 
+the gps data table in the montech.db.
+
+```{r gps_data_table1, eval = FALSE, echo = TRUE}
+
+dbWriteTable(montech_db, "gps_data", gps_data, append = TRUE)
+
+```
+

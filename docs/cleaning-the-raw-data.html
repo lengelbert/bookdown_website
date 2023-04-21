@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 3 Cleaning the Raw Data | A Comparison of Carnivore Monitoring Techniques</title>
+  <meta name="description" content="<p>This book was created as a part of my final project for Simona Picardi’s
+Reproducible Data Science Class. It will outline the steps of my final project.</p>" />
+  <meta name="generator" content="bookdown 0.33 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 3 Cleaning the Raw Data | A Comparison of Carnivore Monitoring Techniques" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="<p>This book was created as a part of my final project for Simona Picardi’s
+Reproducible Data Science Class. It will outline the steps of my final project.</p>" />
+  <meta name="github-repo" content="https://github.com/lengelbert/bookdown_website.git" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 3 Cleaning the Raw Data | A Comparison of Carnivore Monitoring Techniques" />
+  
+  <meta name="twitter:description" content="<p>This book was created as a part of my final project for Simona Picardi’s
+Reproducible Data Science Class. It will outline the steps of my final project.</p>" />
+  
+
+<meta name="author" content="Lindsey Engelbert" />
+
+
+<meta name="date" content="2023-04-21" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="designing-and-building-my-database.html"/>
+<link rel="next" href="visualizing-the-data.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">A Minimal Book Example</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Project Description</a></li>
+<li class="chapter" data-level="2" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html"><i class="fa fa-check"></i><b>2</b> Designing and Building my Database</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#database-structure"><i class="fa fa-check"></i><b>2.1</b> Database structure</a></li>
+<li class="chapter" data-level="2.2" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-database"><i class="fa fa-check"></i><b>2.2</b> Creating the database</a>
+<ul>
+<li class="chapter" data-level="2.2.1" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-carnivores-table"><i class="fa fa-check"></i><b>2.2.1</b> Creating the carnivores table</a></li>
+<li class="chapter" data-level="2.2.2" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-collars-table"><i class="fa fa-check"></i><b>2.2.2</b> Creating the collars table</a></li>
+<li class="chapter" data-level="2.2.3" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-deployments-table"><i class="fa fa-check"></i><b>2.2.3</b> Creating the deployments table</a></li>
+<li class="chapter" data-level="2.2.4" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-raw-gps-data-table"><i class="fa fa-check"></i><b>2.2.4</b> Creating the raw GPS data table</a></li>
+<li class="chapter" data-level="2.2.5" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-capture-sites-table"><i class="fa fa-check"></i><b>2.2.5</b> Creating the capture sites table</a></li>
+<li class="chapter" data-level="2.2.6" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-captures-table"><i class="fa fa-check"></i><b>2.2.6</b> Creating the captures table</a></li>
+<li class="chapter" data-level="2.2.7" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-sampling-cells-table"><i class="fa fa-check"></i><b>2.2.7</b> Creating the sampling cells table</a></li>
+<li class="chapter" data-level="2.2.8" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-sampling-periods-table"><i class="fa fa-check"></i><b>2.2.8</b> Creating the sampling periods table</a></li>
+<li class="chapter" data-level="2.2.9" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-cameras-table"><i class="fa fa-check"></i><b>2.2.9</b> Creating the cameras table</a></li>
+<li class="chapter" data-level="2.2.10" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-photos-table"><i class="fa fa-check"></i><b>2.2.10</b> Creating the photos table</a></li>
+<li class="chapter" data-level="2.2.11" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-transects-table"><i class="fa fa-check"></i><b>2.2.11</b> Creating the transects table</a></li>
+<li class="chapter" data-level="2.2.12" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-scat-samples-table"><i class="fa fa-check"></i><b>2.2.12</b> Creating the scat samples table</a></li>
+<li class="chapter" data-level="2.2.13" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-hair-snares-table"><i class="fa fa-check"></i><b>2.2.13</b> Creating the hair snares table</a></li>
+<li class="chapter" data-level="2.2.14" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-hair-samples-table"><i class="fa fa-check"></i><b>2.2.14</b> Creating the hair samples table</a></li>
+<li class="chapter" data-level="2.2.15" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-genetics-table"><i class="fa fa-check"></i><b>2.2.15</b> Creating the genetics table</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html"><i class="fa fa-check"></i><b>3</b> Cleaning the Raw Data</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#preliminary-steps"><i class="fa fa-check"></i><b>3.1</b> Preliminary steps</a>
+<ul>
+<li class="chapter" data-level="3.1.1" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#load-libraries"><i class="fa fa-check"></i><b>3.1.1</b> Load Libraries</a></li>
+<li class="chapter" data-level="3.1.2" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#database-connection"><i class="fa fa-check"></i><b>3.1.2</b> Database connection</a></li>
+<li class="chapter" data-level="3.1.3" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#import-the-raw-data"><i class="fa fa-check"></i><b>3.1.3</b> Import the raw data</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#formating-data-for-the-tables"><i class="fa fa-check"></i><b>3.2</b> Formating Data for the Tables</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#carnivore-table-formating"><i class="fa fa-check"></i><b>3.2.1</b> Carnivore table formating</a></li>
+<li class="chapter" data-level="3.2.2" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#collar-table-formating"><i class="fa fa-check"></i><b>3.2.2</b> Collar table formating</a></li>
+<li class="chapter" data-level="3.2.3" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#deployments-table-formating"><i class="fa fa-check"></i><b>3.2.3</b> Deployments table formating</a></li>
+<li class="chapter" data-level="3.2.4" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#capture-sites-table-formating"><i class="fa fa-check"></i><b>3.2.4</b> Capture sites table formating</a></li>
+<li class="chapter" data-level="3.2.5" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#gps-data-table-formating"><i class="fa fa-check"></i><b>3.2.5</b> GPS data table formating</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#adding-data-to-the-database"><i class="fa fa-check"></i><b>3.3</b> Adding Data to the Database</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#carnivore-table"><i class="fa fa-check"></i><b>3.3.1</b> Carnivore table</a></li>
+<li class="chapter" data-level="3.3.2" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#collars-table"><i class="fa fa-check"></i><b>3.3.2</b> Collars table</a></li>
+<li class="chapter" data-level="3.3.3" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#deployments-table"><i class="fa fa-check"></i><b>3.3.3</b> Deployments table</a></li>
+<li class="chapter" data-level="3.3.4" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#capture-sites-table"><i class="fa fa-check"></i><b>3.3.4</b> Capture sites table</a></li>
+<li class="chapter" data-level="3.3.5" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#gps-data-table"><i class="fa fa-check"></i><b>3.3.5</b> GPS data table</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="visualizing-the-data.html"><a href="visualizing-the-data.html"><i class="fa fa-check"></i><b>4</b> Visualizing the data</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A Comparison of Carnivore Monitoring Techniques</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="cleaning-the-raw-data" class="section level1 hasAnchor" number="3">
+<h1><span class="header-section-number">Chapter 3</span> Cleaning the Raw Data<a href="cleaning-the-raw-data.html#cleaning-the-raw-data" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Now that the database is built, the raw cougar and black bear data that I’m getting from Utah’s Wildlife Tracker needs to be transformed into a format that can be imported into my monitoring techniques database. The data from Wildlife Tracker will go into my carnivore, capture_sites, collar, deployments, and gps_data tables.</p>
+<div id="preliminary-steps" class="section level2 hasAnchor" number="3.1">
+<h2><span class="header-section-number">3.1</span> Preliminary steps<a href="cleaning-the-raw-data.html#preliminary-steps" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="load-libraries" class="section level3 hasAnchor" number="3.1.1">
+<h3><span class="header-section-number">3.1.1</span> Load Libraries<a href="cleaning-the-raw-data.html#load-libraries" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Load all the libraries I’ll need to run the code</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="cleaning-the-raw-data.html#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
+<span id="cb18-2"><a href="cleaning-the-raw-data.html#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb18-3"><a href="cleaning-the-raw-data.html#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb18-4"><a href="cleaning-the-raw-data.html#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb18-5"><a href="cleaning-the-raw-data.html#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code></pre></div>
+</div>
+<div id="database-connection" class="section level3 hasAnchor" number="3.1.2">
+<h3><span class="header-section-number">3.1.2</span> Database connection<a href="cleaning-the-raw-data.html#database-connection" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Then make sure that there’s still a connection with the monitoring techniques
+database.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="cleaning-the-raw-data.html#cb19-1" aria-hidden="true" tabindex="-1"></a>montech_db <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(),</span>
+<span id="cb19-2"><a href="cleaning-the-raw-data.html#cb19-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;montech.db&quot;</span>)</span></code></pre></div>
+</div>
+<div id="import-the-raw-data" class="section level3 hasAnchor" number="3.1.3">
+<h3><span class="header-section-number">3.1.3</span> Import the raw data<a href="cleaning-the-raw-data.html#import-the-raw-data" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Import the raw data from wildlife tracker</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="cleaning-the-raw-data.html#cb20-1" aria-hidden="true" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;raw_data/2023-04-11_GPS_Data.csv&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>Once these preliminary steps are completed, we can actually clean the data.</p>
+</div>
+</div>
+<div id="formating-data-for-the-tables" class="section level2 hasAnchor" number="3.2">
+<h2><span class="header-section-number">3.2</span> Formating Data for the Tables<a href="cleaning-the-raw-data.html#formating-data-for-the-tables" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="carnivore-table-formating" class="section level3 hasAnchor" number="3.2.1">
+<h3><span class="header-section-number">3.2.1</span> Carnivore table formating<a href="cleaning-the-raw-data.html#carnivore-table-formating" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>I’ll start with the data needed for the carnivores table. I’ll need to pull the
+columns uniqueID, earTag, sex, birthYear, currentCohort, and species from the raw
+data using the <code>select()</code> function. Since these columns have different names than
+the names of my fields in my database table I then need to rename each column
+using the <code>rename()</code> function. Then, because there are many entries for each
+carnivore_id, I need to pull only the unique carnivore ids. In this case I used <code>filter(!duplicated(carnivore_id))</code> instead of distinct because Wildlife Tracker
+calculates the age class based on the birth year so there were duplicate rows for
+individuals that were unique because the collar had been on them for multiple age
+classes. Finally, I need to make sure that my entries matched the table constraints.
+This meant deleting all the spaces in the entries using the <code>gsub()</code> function.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="cleaning-the-raw-data.html#cb21-1" aria-hidden="true" tabindex="-1"></a>carnivores <span class="ot">&lt;-</span> raw_data <span class="sc">%&gt;%</span></span>
+<span id="cb21-2"><a href="cleaning-the-raw-data.html#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(uniqueID, earTag, sex, birthYear, currentCohort, species) <span class="sc">%&gt;%</span></span>
+<span id="cb21-3"><a href="cleaning-the-raw-data.html#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">carnivore_id =</span> uniqueID, </span>
+<span id="cb21-4"><a href="cleaning-the-raw-data.html#cb21-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">ear_tag =</span> earTag, </span>
+<span id="cb21-5"><a href="cleaning-the-raw-data.html#cb21-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">birth_year =</span> birthYear,</span>
+<span id="cb21-6"><a href="cleaning-the-raw-data.html#cb21-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">age_class =</span> currentCohort) <span class="sc">%&gt;%</span></span>
+<span id="cb21-7"><a href="cleaning-the-raw-data.html#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(age_class) <span class="sc">%&gt;%</span></span>
+<span id="cb21-8"><a href="cleaning-the-raw-data.html#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">duplicated</span>(carnivore_id)) <span class="sc">%&gt;%</span></span>
+<span id="cb21-9"><a href="cleaning-the-raw-data.html#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">species =</span> <span class="fu">gsub</span>(<span class="st">&quot; &quot;</span>, <span class="st">&quot;&quot;</span>, species))</span></code></pre></div>
+</div>
+<div id="collar-table-formating" class="section level3 hasAnchor" number="3.2.2">
+<h3><span class="header-section-number">3.2.2</span> Collar table formating<a href="cleaning-the-raw-data.html#collar-table-formating" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>I’ll next create the collars table. Again, I’ll need to pull only the necessary
+columns using the <code>select()</code> function. In this case, it’s only collarID and freq.
+Since Wildlife Tracker doesn’t contain information on brand, model, or status I
+had to create placeholder columns populated with NAs until I can acquire that data
+from a different source. This time the columns are in a different order than
+what I need for my database, so I used the <code>relocate()</code>function to reorder them.
+I then renamed the necessary columns and finally pulled out the unique entries
+using the <code>distinct()</code> function.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="cleaning-the-raw-data.html#cb22-1" aria-hidden="true" tabindex="-1"></a>collars <span class="ot">&lt;-</span> raw_data <span class="sc">%&gt;%</span></span>
+<span id="cb22-2"><a href="cleaning-the-raw-data.html#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(collarID, freq) <span class="sc">%&gt;%</span></span>
+<span id="cb22-3"><a href="cleaning-the-raw-data.html#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">brand =</span> <span class="cn">NA</span>, <span class="at">model =</span> <span class="cn">NA</span>, <span class="at">status =</span> <span class="cn">NA</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb22-4"><a href="cleaning-the-raw-data.html#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(freq, <span class="at">.after =</span> status) <span class="sc">%&gt;%</span></span>
+<span id="cb22-5"><a href="cleaning-the-raw-data.html#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">collar_id =</span> collarID, </span>
+<span id="cb22-6"><a href="cleaning-the-raw-data.html#cb22-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">frequency =</span> freq) <span class="sc">%&gt;%</span></span>
+<span id="cb22-7"><a href="cleaning-the-raw-data.html#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>()</span></code></pre></div>
+</div>
+<div id="deployments-table-formating" class="section level3 hasAnchor" number="3.2.3">
+<h3><span class="header-section-number">3.2.3</span> Deployments table formating<a href="cleaning-the-raw-data.html#deployments-table-formating" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>For the deployments table, I needed to pull carnivoreID and collarID from the
+raw Wildlife Tracker data. Since I don’t yet have data on the deployment start
+and end dates, I just created empty columns for those fields and populated them
+with NA until I acquire the necessary data. Finally, I reordered the columns
+according to my database format using <code>relocate()</code>and grabbed only the unique
+combinations of columns using <code>disctinct()</code>.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="cleaning-the-raw-data.html#cb23-1" aria-hidden="true" tabindex="-1"></a>deployments <span class="ot">&lt;-</span> raw_data <span class="sc">%&gt;%</span></span>
+<span id="cb23-2"><a href="cleaning-the-raw-data.html#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(uniqueID, collarID) <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="cleaning-the-raw-data.html#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">carnivore_id =</span> uniqueID, <span class="at">collar_id =</span> collarID) <span class="sc">%&gt;%</span></span>
+<span id="cb23-4"><a href="cleaning-the-raw-data.html#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(collar_id, <span class="at">.before =</span> carnivore_id) <span class="sc">%&gt;%</span></span>
+<span id="cb23-5"><a href="cleaning-the-raw-data.html#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">start_deployment =</span> <span class="cn">NA</span>, <span class="at">end_deployment =</span> <span class="cn">NA</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-6"><a href="cleaning-the-raw-data.html#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>()</span></code></pre></div>
+</div>
+<div id="capture-sites-table-formating" class="section level3 hasAnchor" number="3.2.4">
+<h3><span class="header-section-number">3.2.4</span> Capture sites table formating<a href="cleaning-the-raw-data.html#capture-sites-table-formating" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>For the capture sites table, I needed to pull the captureUnit, captureSubUnit,
+and realCaptureArea columns from the Wildlife Tracker data using <code>select()</code>. I
+then renamed them and switched the order of the columns so that it matched my
+database table. As there were multiple columns with spaces in the entries, I had
+to eliminate those using <code>gsub</code> so that it matched the database table constraints.
+Lastly, I took only the unique combinations of entries by using <code>distinct()</code>.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="cleaning-the-raw-data.html#cb24-1" aria-hidden="true" tabindex="-1"></a>capture_sites <span class="ot">&lt;-</span> raw_data <span class="sc">%&gt;%</span></span>
+<span id="cb24-2"><a href="cleaning-the-raw-data.html#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(captureUnit, captureSubUnit, realCaptureArea) <span class="sc">%&gt;%</span></span>
+<span id="cb24-3"><a href="cleaning-the-raw-data.html#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">capture_unit =</span> captureUnit, </span>
+<span id="cb24-4"><a href="cleaning-the-raw-data.html#cb24-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">capture_subunit =</span> captureSubUnit,</span>
+<span id="cb24-5"><a href="cleaning-the-raw-data.html#cb24-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">capture_area =</span> realCaptureArea) <span class="sc">%&gt;%</span></span>
+<span id="cb24-6"><a href="cleaning-the-raw-data.html#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(capture_area, <span class="at">.before =</span> capture_unit) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-7"><a href="cleaning-the-raw-data.html#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(capture_subunit, <span class="at">.after =</span> capture_area) <span class="sc">%&gt;%</span></span>
+<span id="cb24-8"><a href="cleaning-the-raw-data.html#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">capture_area =</span> <span class="fu">gsub</span>(<span class="st">&quot; &quot;</span>, <span class="st">&quot;&quot;</span>, capture_area)) <span class="sc">%&gt;%</span></span>
+<span id="cb24-9"><a href="cleaning-the-raw-data.html#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">capture_unit =</span> <span class="fu">gsub</span>(<span class="st">&quot; &quot;</span>, <span class="st">&quot;&quot;</span>, capture_unit)) <span class="sc">%&gt;%</span></span>
+<span id="cb24-10"><a href="cleaning-the-raw-data.html#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>()</span></code></pre></div>
+</div>
+<div id="gps-data-table-formating" class="section level3 hasAnchor" number="3.2.5">
+<h3><span class="header-section-number">3.2.5</span> GPS data table formating<a href="cleaning-the-raw-data.html#gps-data-table-formating" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Yet again, I pulled the columns that I wanted from the raw Wildlife Tracker data
+and renamed and ordered them appropriately. This included collarID,
+datYearAndJUlian, litutde, and longitude. I then had to tell R that the
+timestamp column is a time and date, as well as the format and timezone of that
+time and date.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="cleaning-the-raw-data.html#cb25-1" aria-hidden="true" tabindex="-1"></a>gps_data <span class="ot">&lt;-</span> raw_data <span class="sc">%&gt;%</span></span>
+<span id="cb25-2"><a href="cleaning-the-raw-data.html#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(collarID, dateYearAndJulian, latitude, longitude) <span class="sc">%&gt;%</span></span>
+<span id="cb25-3"><a href="cleaning-the-raw-data.html#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">collar_id =</span> collarID, </span>
+<span id="cb25-4"><a href="cleaning-the-raw-data.html#cb25-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">timestamp =</span> dateYearAndJulian) <span class="sc">%&gt;%</span></span>
+<span id="cb25-5"><a href="cleaning-the-raw-data.html#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(longitude, <span class="at">.before =</span> latitude) <span class="sc">%&gt;%</span></span>
+<span id="cb25-6"><a href="cleaning-the-raw-data.html#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">timestamp =</span> <span class="fu">mdy_hm</span>(timestamp, <span class="at">tz =</span> <span class="st">&quot;America/Denver&quot;</span>)) </span></code></pre></div>
+<p>There were then a number of steps I had to take to convert the fix points from
+lat long to utm. First, I had to turn the lat long columns into a spatial object
+so that R could recognize them as such. Then I could transform that spatial object
+to utm coordinates and pull just those columns from the data. I then joined those
+utm easting and northing columns back with the object I created from the
+Wildlife Tracker data, deleted the lat long columns, and renamed the utm columns
+so that they matched my database table.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="cleaning-the-raw-data.html#cb26-1" aria-hidden="true" tabindex="-1"></a>utm_coords <span class="ot">&lt;-</span> gps_data <span class="sc">%&gt;%</span> </span>
+<span id="cb26-2"><a href="cleaning-the-raw-data.html#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">&quot;longitude&quot;</span>, <span class="st">&quot;latitude&quot;</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb26-3"><a href="cleaning-the-raw-data.html#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32612</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb26-4"><a href="cleaning-the-raw-data.html#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_coordinates</span>()</span>
+<span id="cb26-5"><a href="cleaning-the-raw-data.html#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="cleaning-the-raw-data.html#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="cleaning-the-raw-data.html#cb26-7" aria-hidden="true" tabindex="-1"></a>gps_data <span class="ot">&lt;-</span> <span class="fu">cbind</span>(gps_data, utm_coords) <span class="sc">%&gt;%</span></span>
+<span id="cb26-8"><a href="cleaning-the-raw-data.html#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(collar_id, timestamp, X, Y) <span class="sc">%&gt;%</span></span>
+<span id="cb26-9"><a href="cleaning-the-raw-data.html#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">utm_x =</span> X, <span class="at">utm_y =</span> Y)</span></code></pre></div>
+</div>
+</div>
+<div id="adding-data-to-the-database" class="section level2 hasAnchor" number="3.3">
+<h2><span class="header-section-number">3.3</span> Adding Data to the Database<a href="cleaning-the-raw-data.html#adding-data-to-the-database" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Now that the data is cleaned and organized according to the format of the
+monitoring techniques database tables, we can actually add the data to the tables.
+This is a simple process that can be done with a single line of code for each table.</p>
+<p>Since this is our first time adding we can merely tell it to append the data to
+the table. However, in the future when we have to be careful about whether we’re
+telling it to append or overwrite the data. In cases where we’re downloading all
+the data that exists for a table we can tell it to overwrite, but in cases where
+we’re merely adding data that’s new since the last time we downloaded we need to
+make sure we’re telling it to append that data to what already exists in the table.</p>
+<div id="carnivore-table" class="section level3 hasAnchor" number="3.3.1">
+<h3><span class="header-section-number">3.3.1</span> Carnivore table<a href="cleaning-the-raw-data.html#carnivore-table" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Here I added the data I pulled and formatted from the Wildlife Tracker raw data to
+the carnivores table in the montech.db.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="cleaning-the-raw-data.html#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(montech_db, <span class="st">&quot;carnivores&quot;</span>, carnivores, <span class="at">append =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="collars-table" class="section level3 hasAnchor" number="3.3.2">
+<h3><span class="header-section-number">3.3.2</span> Collars table<a href="cleaning-the-raw-data.html#collars-table" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Here I added the data I pulled and formatted from the Wildlife Tracker raw data to
+the collars table in the montech.db.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="cleaning-the-raw-data.html#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(montech_db, <span class="st">&quot;collars&quot;</span>, collars, <span class="at">append =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="deployments-table" class="section level3 hasAnchor" number="3.3.3">
+<h3><span class="header-section-number">3.3.3</span> Deployments table<a href="cleaning-the-raw-data.html#deployments-table" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Here I added the data I pulled and formatted from the Wildlife Tracker raw data
+to the deployments table in the montech.db.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="cleaning-the-raw-data.html#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(montech_db, <span class="st">&quot;deployments&quot;</span>, deployments, <span class="at">append =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="capture-sites-table" class="section level3 hasAnchor" number="3.3.4">
+<h3><span class="header-section-number">3.3.4</span> Capture sites table<a href="cleaning-the-raw-data.html#capture-sites-table" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Here I added the data I pulled and formatted from the Wildlife Tracker raw data to
+the capture sites table in the montech.db.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="cleaning-the-raw-data.html#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(montech_db, <span class="st">&quot;capture_sites&quot;</span>, capture_sites, <span class="at">append =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="gps-data-table" class="section level3 hasAnchor" number="3.3.5">
+<h3><span class="header-section-number">3.3.5</span> GPS data table<a href="cleaning-the-raw-data.html#gps-data-table" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Here I added the data I pulled and formatted from the Wildlife Tracker raw data to
+the gps data table in the montech.db.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="cleaning-the-raw-data.html#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(montech_db, <span class="st">&quot;gps_data&quot;</span>, gps_data, <span class="at">append =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="designing-and-building-my-database.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="visualizing-the-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/USERNAME/REPO/edit/BRANCH/02-GPS_Data_Conversion.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["_main.pdf", "_main.epub"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

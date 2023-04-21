@@ -26,7 +26,7 @@ Reproducible Data Science Class. It will outline the steps of my final project.<
 <meta name="author" content="Lindsey Engelbert" />
 
 
-<meta name="date" content="2023-03-19" />
+<meta name="date" content="2023-04-21" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -34,7 +34,7 @@ Reproducible Data Science Class. It will outline the steps of my final project.<
   
   
 <link rel="prev" href="index.html"/>
-
+<link rel="next" href="cleaning-the-raw-data.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -162,6 +162,32 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2.2.15" data-path="designing-and-building-my-database.html"><a href="designing-and-building-my-database.html#creating-the-genetics-table"><i class="fa fa-check"></i><b>2.2.15</b> Creating the genetics table</a></li>
 </ul></li>
 </ul></li>
+<li class="chapter" data-level="3" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html"><i class="fa fa-check"></i><b>3</b> Cleaning the Raw Data</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#preliminary-steps"><i class="fa fa-check"></i><b>3.1</b> Preliminary steps</a>
+<ul>
+<li class="chapter" data-level="3.1.1" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#load-libraries"><i class="fa fa-check"></i><b>3.1.1</b> Load Libraries</a></li>
+<li class="chapter" data-level="3.1.2" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#database-connection"><i class="fa fa-check"></i><b>3.1.2</b> Database connection</a></li>
+<li class="chapter" data-level="3.1.3" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#import-the-raw-data"><i class="fa fa-check"></i><b>3.1.3</b> Import the raw data</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#formating-data-for-the-tables"><i class="fa fa-check"></i><b>3.2</b> Formating Data for the Tables</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#carnivore-table-formating"><i class="fa fa-check"></i><b>3.2.1</b> Carnivore table formating</a></li>
+<li class="chapter" data-level="3.2.2" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#collar-table-formating"><i class="fa fa-check"></i><b>3.2.2</b> Collar table formating</a></li>
+<li class="chapter" data-level="3.2.3" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#deployments-table-formating"><i class="fa fa-check"></i><b>3.2.3</b> Deployments table formating</a></li>
+<li class="chapter" data-level="3.2.4" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#capture-sites-table-formating"><i class="fa fa-check"></i><b>3.2.4</b> Capture sites table formating</a></li>
+<li class="chapter" data-level="3.2.5" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#gps-data-table-formating"><i class="fa fa-check"></i><b>3.2.5</b> GPS data table formating</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#adding-data-to-the-database"><i class="fa fa-check"></i><b>3.3</b> Adding Data to the Database</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#carnivore-table"><i class="fa fa-check"></i><b>3.3.1</b> Carnivore table</a></li>
+<li class="chapter" data-level="3.3.2" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#collars-table"><i class="fa fa-check"></i><b>3.3.2</b> Collars table</a></li>
+<li class="chapter" data-level="3.3.3" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#deployments-table"><i class="fa fa-check"></i><b>3.3.3</b> Deployments table</a></li>
+<li class="chapter" data-level="3.3.4" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#capture-sites-table"><i class="fa fa-check"></i><b>3.3.4</b> Capture sites table</a></li>
+<li class="chapter" data-level="3.3.5" data-path="cleaning-the-raw-data.html"><a href="cleaning-the-raw-data.html#gps-data-table"><i class="fa fa-check"></i><b>3.3.5</b> GPS data table</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="visualizing-the-data.html"><a href="visualizing-the-data.html"><i class="fa fa-check"></i><b>4</b> Visualizing the data</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
 
@@ -495,8 +521,8 @@ column.</p>
           </div>
         </div>
       </div>
-<a href="index.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="cleaning-the-raw-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

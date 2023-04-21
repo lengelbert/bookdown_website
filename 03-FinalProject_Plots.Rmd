@@ -1,0 +1,94 @@
+# Visualizing the data
+
+
+
+```{r pkg3, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+
+library(tidyverse)
+library(DBI)
+library(viridis)
+library(patchwork)
+
+```
+
+Now that we have some data in our database, let's take a look at what we have.
+Since we don't have much data, let's just examine the data from the carnivores 
+table such as how many of each species we have collared and what the age class 
+and sex ratios are for each species.
+
+```{r database_connection3, eval = TRUE, echo = FALSE, message = FALSE}
+# my personal location for this course
+  knitr::opts_knit$set(root.dir = "C:/Users/engel/Documents/PhD/Research/MonitoringTechniques/MonitoringTechniques_data")
+
+montech_db <- dbConnect(RSQLite::SQLite(),
+                        "montech.db")
+
+carnivores <- dbGetQuery(montech_db, "SELECT * FROM carnivores;")
+
+```
+
+
+```{r species_plot, eval = TRUE, echo=FALSE}
+
+p1 <- carnivores %>%
+  ggplot(aes(x = species, fill = species)) +
+  geom_bar() +
+  labs(x = "", y = "Count", fill = "Species") +
+  scale_y_continuous(breaks = seq(0, 10, by = 2)) +
+  theme_light() +
+  scale_fill_viridis_d(option = "viridis") +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+```
+
+```{r species_age_plot, eval = TRUE, echo = FALSE}
+
+p2 <- carnivores %>%
+  ggplot(aes(x = species, fill = age_class)) +
+  geom_bar() +
+  labs(x = "", y = "Count", fill = "Age Class") +
+  scale_y_continuous(breaks = seq(0, 10, by = 2)) +
+  theme_light() +
+  scale_fill_viridis_d(option = "viridis") +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+```
+
+```{r species_sex_plot, eval = TRUE, echo = FALSE}
+
+p3 <- carnivores %>%
+  ggplot(aes(x = species, fill = sex)) +
+  geom_bar() +
+  labs(x = "", y = "Count", fill = "Sex") +
+  scale_y_continuous(breaks = seq(0, 10, by = 2)) +
+  theme_light() +
+  scale_fill_viridis_d(option = "viridis") +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+p1 / p2 / p3
+
+```
+
+
+```{r species, eval = FALSE, echo = FALSE}
+
+p3 <- capture_sites %>%
+  ggplot(aes(x = species, fill = sex)) +
+  geom_bar() +
+  labs(x = "", y = "Count", fill = "Sex") +
+  scale_y_continuous(breaks = seq(0, 10, by = 2)) +
+  theme_light() +
+  scale_fill_viridis_d(option = "viridis") +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+p1 / (p2 | p3)
+
+```
