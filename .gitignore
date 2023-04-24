@@ -2,4 +2,4 @@
 /*.Rproj.user/
 *.png
 .Rproj.user
-!docs/*.png
+!docs/**/*.png
